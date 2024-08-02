@@ -24,29 +24,6 @@ create table nivelAcademico(
 
 insert into nivelAcademico(nivel) values('BACHILLERATO'),('UNIVERSIDAD');
 
-/*
-create table tipoEscuela(
-	id_Tipo_Escuela int primary key,
-    nombre varchar(30)
-);
-
-insert into tipoEscuela values
-(1,'DEGETI'),
-(2,'CETIS'),
-(3,'CONALEP'),
-(4,'OTRO');
-*/;
-create table escuela(
-	id_escuela int primary key,
-    nombre_escuela varchar(100)
-	/*
-    ,tipoEscuela int ,
-    foreign key(tipoEscuela) references tipoEscuela(id_Tipo_Escuela)
-    */
-);
-
-#insert into escuela values(1,'JOSEFA ORTIZ DE DOMINGUEZ',2);
-
 create table departamento(
 	idDepartamento int primary key auto_increment,
     nombre varchar(50)
@@ -89,7 +66,9 @@ create table tutor(
     foreign key (idPerfil) references perfil(id_perfil),
     nombres varchar(30),
     apellidos varchar(30),
-    numTarjetaBienestar varchar(16) unique
+    numTarjetaBienestar varchar(16) unique,
+    
+    nombreEscuela varchar(100)
     #escuela?
 );
 
@@ -152,11 +131,26 @@ create table tutoria_has_mensajes(
     horaEnvio time,
     mensaje varchar(150),
     
+    important boolean ,
+    
     foreign key(idTutoria) references tutorias(idTutoria),
     foreign key(idPerfil) references perfil(id_perfil)
 );
 
-#insert into tutoria_has_mensajes(idTutoria,idPerfil,fechaEnvio,horaEnvio,mensaje) values(1,'hola que hacen');
+select * from tutorias;
+
+select * from alumno a join perfil p on a.idPerfil=p.id_perfil;
+
+insert into tutoria_has_alumno(idTutoria,idAlumno,fechaInicio,fechaFin) values(1,4,'2024-03-12','2024-04-12');
+
+select * from tutoria_has_alumno where idTutoria=1;
+
+
+insert into tutoria_has_mensajes(idTutoria,idPerfil,fechaEnvio,horaEnvio,mensaje) values
+(1,1,'2024-03-12','15:00:00','hola que hacen'),
+(1,1,'2024-03-12','15:02:00','hay alguien??');
+
+select * from tutoria_has_mensajes where idTutoria=1;
 
 create table documentos(
 	#idea : guardar los documentos en drive y acceder por la url
@@ -171,4 +165,49 @@ create table tutorias_has_documentos(
     foreign key(idTutoria) references tutorias(idTutoria),
     foreign key(idDocumento) references documentos(idDocumento)
 );
+
+create table catalogoQuejas(
+	idQueja int primary key auto_increment,
+    descripcion varchar(30)
+);
+insert into catalogoQuejas(descripcion) values
+('spam'),
+('contenido violento'),
+('contenido ofensivo'),
+('otro');
+
+create table buzon_quejas(
+	idReporte int primary key auto_increment,
+    idPerfilReportando int,
+    
+    idPerfilReportado int,
+    idTutoriaReportada int,
+    idMensajeReportado int,
+    
+    fechaEnvio datetime,
+    
+    foreign key(idPerfilReportando) references perfil(id_perfil),
+    
+    foreign key(idPerfilReportado) references perfil(id_perfil),
+    foreign key(idTutoriaReportada) references tutorias(idTutoria),
+    foreign key (idMensajeReportado) references tutoria_has_mensajes(idMensaje)
+);
+
+create table buzon_has_quejas(
+	idReporte int,
+    idMotivo int,
+    foreign key(idReporte) references buzon_quejas(idReporte), 
+    foreign key (idMotivo) references catalogoQuejas(idQueja) 
+);
+
+create table queja_has_razon(
+	idRazon int primary key auto_increment,
+    descripcion varchar(150),
+    idQueja int,
+    
+    foreign key (idQueja) references buzon_quejas(idReporte)
+);
+
+
+
 
